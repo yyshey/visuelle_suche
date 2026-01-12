@@ -1,3 +1,4 @@
+
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -14,15 +15,8 @@ body {
 
 h1 { color:#333; }
 
-h2 {
-  color: black;
-  margin-top: 15px;
-}
-
-h2 span {
-  color: red;
-  font-weight: bold;
-}
+h2 { margin-top: 15px; }
+h2 span { color: red; font-weight: bold; }
 
 #arena {
   position: relative;
@@ -72,10 +66,13 @@ button {
 <div id="result"></div>
 
 <script>
-const TOTAL_TASKS = 27;
+const TOTAL_TASKS = 30; // <<< HIER 30 AUFGABEN
 let currentTask = 0;
 let score = 0;
 let correctPresent = false;
+
+let reactionTimes = [];
+let startTime = 0;
 
 const arena = document.getElementById("arena");
 const resultDiv = document.getElementById("result");
@@ -103,13 +100,13 @@ function newTask() {
   arena.innerHTML = "";
   let used = [];
 
-  // entscheidet OB ein echtes rotes T existiert
+  startTime = performance.now();
+
   correctPresent = Math.random() < 0.5;
 
-  // Anzahl Distraktoren
-  let totalLetters = 18 + Math.floor(Math.random() * 8);
+  let distractors = 18 + Math.floor(Math.random() * 8);
 
-  // richtiges T (nur 1!)
+  // echtes rotes T (max. 1)
   if (correctPresent) {
     let pos = randomPosition(used);
     used.push(pos);
@@ -118,13 +115,13 @@ function newTask() {
     t.className = "letter red";
     t.style.left = pos.x + "px";
     t.style.top = pos.y + "px";
-    t.style.transform = "rotate(0deg)"; // NUR normales T
+    t.style.transform = "rotate(0deg)";
     t.textContent = "T";
     arena.appendChild(t);
   }
 
   // falsche T
-  for (let i = 0; i < totalLetters; i++) {
+  for (let i = 0; i < distractors; i++) {
     let pos = randomPosition(used);
     used.push(pos);
 
@@ -142,17 +139,32 @@ function newTask() {
 }
 
 function answer(userSaysYes) {
+  let rt = performance.now() - startTime;
+  reactionTimes.push(rt);
+
   if (userSaysYes === correctPresent) score++;
+
   currentTask++;
 
   if (currentTask >= TOTAL_TASKS) {
-    arena.innerHTML = "";
-    question.style.display = "none";
-    buttons.style.display = "none";
-    resultDiv.textContent = `Ergebnis: ${score} von ${TOTAL_TASKS} richtig`;
+    finish();
   } else {
     newTask();
   }
+}
+
+function finish() {
+  arena.innerHTML = "";
+  question.style.display = "none";
+  buttons.style.display = "none";
+
+  let avgRT = Math.round(
+    reactionTimes.reduce((a,b)=>a+b,0) / reactionTimes.length
+  );
+
+  resultDiv.innerHTML =
+    `Ergebnis: ${score} von ${TOTAL_TASKS} richtig<br>` +
+    `Ø Reaktionszeit: ${avgRT} ms`;
 }
 
 // Start
@@ -161,4 +173,3 @@ newTask();
 
 </body>
 </html>
-
