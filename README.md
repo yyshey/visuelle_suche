@@ -44,8 +44,8 @@ button {
 }
 
 #result {
-  font-size: 22px;
-  font-weight: bold;
+  display: none;
+  font-size: 18px;
   margin-top: 30px;
 }
 </style>
@@ -66,11 +66,11 @@ button {
 <div id="result"></div>
 
 <script>
-const TOTAL_TASKS = 30; // <<< HIER 30 AUFGABEN
+const TOTAL_TASKS = 30;
+
 let currentTask = 0;
 let score = 0;
 let correctPresent = false;
-
 let reactionTimes = [];
 let startTime = 0;
 
@@ -79,7 +79,6 @@ const resultDiv = document.getElementById("result");
 const question = document.getElementById("question");
 const buttons = document.getElementById("buttons");
 
-// verhindert Überlappen
 function freePosition(x, y, used) {
   for (let p of used) {
     if (Math.hypot(p.x - x, p.y - y) < 22) return false;
@@ -99,14 +98,13 @@ function randomPosition(used) {
 function newTask() {
   arena.innerHTML = "";
   let used = [];
-
   startTime = performance.now();
 
   correctPresent = Math.random() < 0.5;
 
   let distractors = 18 + Math.floor(Math.random() * 8);
 
-  // echtes rotes T (max. 1)
+  // EIN echtes rotes normales T
   if (correctPresent) {
     let pos = randomPosition(used);
     used.push(pos);
@@ -138,19 +136,15 @@ function newTask() {
   }
 }
 
-function answer(userSaysYes) {
+function answer(userYes) {
   let rt = performance.now() - startTime;
   reactionTimes.push(rt);
 
-  if (userSaysYes === correctPresent) score++;
-
+  if (userYes === correctPresent) score++;
   currentTask++;
 
-  if (currentTask >= TOTAL_TASKS) {
-    finish();
-  } else {
-    newTask();
-  }
+  if (currentTask >= TOTAL_TASKS) finish();
+  else newTask();
 }
 
 function finish() {
@@ -158,16 +152,20 @@ function finish() {
   question.style.display = "none";
   buttons.style.display = "none";
 
-  let avgRT = Math.round(
-    reactionTimes.reduce((a,b)=>a+b,0) / reactionTimes.length
-  );
+  let sum = 0;
+  for (let rt of reactionTimes) sum += rt;
+  let avgRT = Math.round(sum / reactionTimes.length);
 
-  resultDiv.innerHTML =
-    `Ergebnis: ${score} von ${TOTAL_TASKS} richtig<br>` +
-    `Ø Reaktionszeit: ${avgRT} ms`;
+  resultDiv.style.display = "block";
+  resultDiv.innerHTML = `
+    <div style="background:white; padding:20px; border-radius:12px;">
+      <h2>Dein Ergebnis</h2>
+      <p><strong>${score} von ${TOTAL_TASKS}</strong> Aufgaben richtig</p>
+      <p><strong>Ø Reaktionszeit:</strong> ${avgRT} ms</p>
+    </div>
+  `;
 }
 
-// Start
 newTask();
 </script>
 
