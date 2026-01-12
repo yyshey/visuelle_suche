@@ -1,4 +1,5 @@
 # visuelle_suche
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -10,7 +11,7 @@ h1 { color:#333; }
 h2 { margin-top:20px; }
 button { padding:10px 25px; margin:15px; font-size:18px; cursor:pointer; border-radius:5px; }
 #result { font-size:20px; font-weight:bold; margin-top:30px; color:#222; }
-#letters { position:relative; width:300px; height:300px; margin:20px auto; border:1px solid transparent; } 
+#letters { position:relative; width:300px; height:300px; margin:20px auto; border:1px solid transparent; }
 .letter { position:absolute; font-size:18px; font-weight:bold; user-select:none; }
 .red { color:red; }
 .blue { color:blue; }
@@ -27,7 +28,7 @@ button { padding:10px 25px; margin:15px; font-size:18px; cursor:pointer; border-
 <div id="result"></div>
 
 <script>
-let total = 20;
+let total = 27;
 let current = 0;
 let score = 0;
 let lettersDiv = document.getElementById('letters');
@@ -38,7 +39,7 @@ let buttonsDiv = document.getElementById('buttons');
 function randomRotation(){ return [0,90,180,270][Math.floor(Math.random()*4)]; }
 function randomColor(){ return Math.random() < 0.5 ? 'red' : 'blue'; }
 
-// Prüfen, ob neue Position genug Abstand zu allen bisherigen hat
+// Prüfen, ob Position frei ist (kein Überlappen)
 function isValidPosition(x, y, positions, size=20){
   for(let p of positions){
     let dx = x - p.x;
@@ -55,7 +56,6 @@ function randomPosition(existing){
     let y = Math.random() * 270;
     if(isValidPosition(x, y, existing, 20)) return {x:x, y:y};
   }
-  // Falls keine freie Position gefunden, trotzdem zurückgeben
   return {x: Math.random()*270, y: Math.random()*270};
 }
 
@@ -64,9 +64,9 @@ function generateTask(){
   let task = [];
   let positions = [];
   let hasRedT = Math.random() < 0.5; // 50% Chance
-  let numLetters = 15 + Math.floor(Math.random()*10); // 15-25 T's
+  let numLetters = 15 + Math.floor(Math.random()*10); // 15-24 T's
   let redInserted = false;
-  
+
   for(let i=0;i<numLetters;i++){
     let rotate = randomRotation();
     let color = randomColor();
@@ -80,7 +80,8 @@ function generateTask(){
       task.push({red:false, rotate:rotate, color:color, x:pos.x, y:pos.y});
     }
   }
-  return {task:task, hasRedT:hasRedT};
+  // Sicherheit: wenn zufällig kein rotes T eingefügt wurde, dann bleibt Aufgabe "Nein"
+  return {task:task, hasRedT:hasRedT && redInserted};
 }
 
 // Aufgabe anzeigen
@@ -92,11 +93,11 @@ function showTask(){
     resultDiv.innerHTML = `Du hast ${score} von ${total} richtig!`;
     return;
   }
-  
+
   let tdata = generateTask();
   window.currentTask = tdata;
   lettersDiv.innerHTML = "";
-  
+
   for(let c of tdata.task){
     let span = document.createElement('span');
     span.classList.add('letter');
