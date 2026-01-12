@@ -1,5 +1,6 @@
 # visuelle_suche
 
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -71,14 +72,16 @@ function generateTask(){
 
   for(let i=0;i<numLetters;i++){
     let rotate = randomRotation();
-    let color = randomColor();
     let pos = randomPosition(positions);
     positions.push(pos);
 
+    // Nur ein rotes T
     if(i === redIndex){
       task.push({red:true, rotate:0, color:'red', x:pos.x, y:pos.y});
       redInserted = true;
     } else {
+      // Falsches T: kann rot oder blau sein, aber kein richtiges rotes T
+      let color = Math.random() < 0.5 ? 'blue' : 'red';
       task.push({red:false, rotate:rotate, color:color, x:pos.x, y:pos.y});
     }
   }
