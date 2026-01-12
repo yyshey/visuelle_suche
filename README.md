@@ -1,6 +1,5 @@
 # visuelle_suche
 
-<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
